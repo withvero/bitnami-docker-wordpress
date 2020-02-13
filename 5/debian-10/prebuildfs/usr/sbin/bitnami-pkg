@@ -152,13 +152,21 @@ else
   else
     CURL_ARGS="-sS"
   fi
-  if ! curl $CURL_ARGS -LOf "https://downloads.bitnami.com/files/$RELEASE_BUCKET/$PACKAGE.tar.gz"; then
-    warn "Package name '$PACKAGE' does not exist, will try '${PACKAGE%-$(identify_distro)}'..."
-    if curl $CURL_ARGS -LOf "https://downloads.bitnami.com/files/$RELEASE_BUCKET/${PACKAGE%-$(identify_distro)}.tar.gz"; then
-      PACKAGE="${PACKAGE%-$(identify_distro)}"
-    else
+
+  if [[ $PACKAGE == wordpress* ]]; then
+    if ! curl $CURL_ARGS -LOf "https://vero-artifacts.s3-us-west-2.amazonaws.com/$PACKAGE.tar.gz"; then
       error "Could not find the requested package..."
       exit 1
+    fi
+  else
+    if ! curl $CURL_ARGS -LOf "https://downloads.bitnami.com/files/$RELEASE_BUCKET/$PACKAGE.tar.gz"; then
+      warn "Package name '$PACKAGE' does not exist, will try '${PACKAGE%-$(identify_distro)}'..."
+      if curl $CURL_ARGS -LOf "https://downloads.bitnami.com/files/$RELEASE_BUCKET/${PACKAGE%-$(identify_distro)}.tar.gz"; then
+        PACKAGE="${PACKAGE%-$(identify_distro)}"
+      else
+        error "Could not find the requested package..."
+        exit 1
+      fi
     fi
   fi
 fi
